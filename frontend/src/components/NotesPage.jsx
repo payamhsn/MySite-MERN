@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Spinner from "./Spinner";
 
 const NotesPage = () => {
   const [notes, setNotes] = useState([]);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [editingNoteId, setEditingNoteId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetchNotes();
@@ -13,6 +16,7 @@ const NotesPage = () => {
 
   const fetchNotes = async () => {
     try {
+      setLoading(true);
       const config = {
         headers: {
           Authorization: `Bearer ${
@@ -24,12 +28,15 @@ const NotesPage = () => {
       setNotes(response.data);
     } catch (error) {
       console.error("Error fetching notes:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setSaving(true);
       const config = {
         headers: {
           Authorization: `Bearer ${
@@ -52,6 +59,8 @@ const NotesPage = () => {
       setEditingNoteId(null);
     } catch (error) {
       console.error("Error saving note:", error);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -76,6 +85,13 @@ const NotesPage = () => {
     setContent(note.content);
     setEditingNoteId(note._id);
   };
+  if (loading) {
+    return (
+      <div className="h-[50vh] flex items-center justify-center">
+        <Spinner size="large" />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -96,7 +112,12 @@ const NotesPage = () => {
           className="border p-2 mb-2 w-full h-32"
           required
         />
-        <button type="submit" className="bg-blue-500 text-white p-2 rounded">
+        <button
+          type="submit"
+          disabled={saving}
+          className="bg-blue-500 text-white p-2 rounded"
+        >
+          {saving && <Spinner size="small" className="text-white" />}
           {editingNoteId ? "Update Note" : "Add Note"}
         </button>
       </form>

@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Spinner from "./Spinner";
 
 const Todos = () => {
   const [todos, setTodos] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [newTodo, setNewTodo] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetchTodos();
@@ -11,6 +14,7 @@ const Todos = () => {
 
   const fetchTodos = async () => {
     try {
+      setLoading(true);
       const config = {
         headers: {
           Authorization: `Bearer ${
@@ -22,12 +26,15 @@ const Todos = () => {
       setTodos(response.data);
     } catch (error) {
       console.error("Error fetching todos:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const addTodo = async (e) => {
     e.preventDefault();
     try {
+      setSaving(true);
       const config = {
         headers: {
           Authorization: `Bearer ${
@@ -44,6 +51,8 @@ const Todos = () => {
       setNewTodo("");
     } catch (error) {
       console.error("Error adding todo:", error);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -81,18 +90,31 @@ const Todos = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="h-[50vh] flex items-center justify-center">
+        <Spinner size="large" />
+      </div>
+    );
+  }
+
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">Todos</h2>
-      <form onSubmit={addTodo} className="mb-4">
+      <form onSubmit={addTodo} className="mb-4 flex items-center gap-2">
         <input
           type="text"
           value={newTodo}
           onChange={(e) => setNewTodo(e.target.value)}
           placeholder="Add a new todo"
-          className="border p-2 mr-2"
+          className="border p-2"
         />
-        <button type="submit" className="bg-blue-500 text-white p-2 rounded">
+        <button
+          type="submit"
+          className="bg-blue-500 text-white p-2 rounded flex items-center gap-2"
+          disabled={saving}
+        >
+          {saving && <Spinner size="small" className="text-white" />}
           Add Todo
         </button>
       </form>

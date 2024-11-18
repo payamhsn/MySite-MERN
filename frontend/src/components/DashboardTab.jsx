@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Spinner from "./Spinner";
 
 const DashboardTab = () => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editedUser, setEditedUser] = useState({
     name: "",
@@ -16,6 +18,7 @@ const DashboardTab = () => {
 
   const fetchUserData = async () => {
     try {
+      setLoading(true);
       const { data } = await axios.get("/api/users/profile");
       setUser(data);
       setEditedUser({
@@ -25,8 +28,18 @@ const DashboardTab = () => {
       });
     } catch (error) {
       console.error("Error fetching user data:", error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="h-[50vh] flex items-center justify-center">
+        <Spinner size="large" />
+      </div>
+    );
+  }
 
   const handleEditClick = () => {
     setIsModalOpen(true);
