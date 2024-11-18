@@ -1,13 +1,60 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import Todos from "../components/Todos";
+import NotesPage from "../components/NotesPage";
 
 const DashboardPage = () => {
-  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("Dashboard");
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "Dashboard":
+        return (
+          <p>This is your personal dashboard. You can add more content here.</p>
+        );
+      case "Todos":
+        return <Todos />;
+      case "Notes":
+        return <NotesPage />;
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="container mx-auto mt-10">
-      <h1 className="text-3xl font-bold mb-5">Welcome to your Dashboard</h1>
-      <p>This is your personal dashboard. You can add more content here.</p>
+    <div className="flex">
+      <div className="w-1/4 bg-gray-200 p-4 ">
+        <h2 className="text-xl font-bold mb-4">Panel</h2>
+        <ul className="">
+          <li
+            className={`cursor-pointer mb-2 ${
+              activeTab === "Dashboard" ? "font-bold" : ""
+            }`}
+            onClick={() => setActiveTab("Dashboard")}
+          >
+            Dashboard
+          </li>
+          <li
+            className={`cursor-pointer mb-2 ${
+              activeTab === "Todos" ? "font-bold" : ""
+            }`}
+            onClick={() => setActiveTab("Todos")}
+          >
+            Todos
+          </li>
+          <li
+            className={`cursor-pointer mb-2 ${
+              activeTab === "Notes" ? "font-bold" : ""
+            }`}
+            onClick={() => setActiveTab("Notes")}
+          >
+            Notes
+          </li>
+        </ul>
+      </div>
+      <div className="w-3/4 p-4">
+        <h1 className="text-3xl font-bold mb-5">Welcome to your Dashboard</h1>
+        {renderContent()}
+      </div>
     </div>
   );
 };
