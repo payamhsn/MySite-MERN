@@ -8,10 +8,16 @@ import LoginPage from "./screens/LoginPage";
 import RegisterPage from "./screens/RegisterPage";
 import DashboardPage from "./screens/DashboardPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Toast from "./components/Toast";
 import axios from "axios";
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,10 +30,19 @@ export default function App() {
       await axios.post("/api/users/logout");
       localStorage.removeItem("userInfo");
       setIsLoggedIn(false);
+      setToast({
+        show: true,
+        message: "Successfully logged out!",
+        type: "success",
+      });
       navigate("/");
     } catch (error) {
       console.error(error);
-      // Display an error message to the user
+      setToast({
+        show: true,
+        message: "Error logging out. Please try again.",
+        type: "error",
+      });
     }
   };
 
@@ -59,6 +74,13 @@ export default function App() {
         </Routes>
       </main>
       <Footer />
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ ...toast, show: false })}
+        />
+      )}
     </div>
   );
 }

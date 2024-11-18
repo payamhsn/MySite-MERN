@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Todos from "../components/Todos";
 import NotesPage from "../components/NotesPage";
+import DashboardTab from "../components/DashboardTab";
 
 const DashboardPage = () => {
   const [activeTab, setActiveTab] = useState("Dashboard");
@@ -8,9 +9,7 @@ const DashboardPage = () => {
   const renderContent = () => {
     switch (activeTab) {
       case "Dashboard":
-        return (
-          <p>This is your personal dashboard. You can add more content here.</p>
-        );
+        return <DashboardTab />;
       case "Todos":
         return <Todos />;
       case "Notes":
@@ -52,7 +51,7 @@ const DashboardPage = () => {
         </ul>
       </div>
       <div className="w-3/4 p-4">
-        <h1 className="text-3xl font-bold mb-5">Welcome to your Dashboard</h1>
+        {/* <h1 className="text-3xl font-bold mb-5">Welcome to your Dashboard</h1> */}
         {renderContent()}
       </div>
     </div>
