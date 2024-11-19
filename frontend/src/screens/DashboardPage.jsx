@@ -2,9 +2,20 @@ import React, { useState } from "react";
 import Todos from "../components/Todos";
 import NotesPage from "../components/NotesPage";
 import DashboardTab from "../components/DashboardTab";
+import FilesPage from "../components/FilesPage";
 
 const DashboardPage = () => {
   const [activeTab, setActiveTab] = useState("Dashboard");
+
+  // Get current date and day name
+  const currentDate = new Date();
+  const options = {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
+  const formattedDate = currentDate.toLocaleDateString("en-US", options);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -14,6 +25,8 @@ const DashboardPage = () => {
         return <Todos />;
       case "Notes":
         return <NotesPage />;
+      case "Files":
+        return <FilesPage />;
       default:
         return null;
     }
@@ -22,7 +35,7 @@ const DashboardPage = () => {
   return (
     <div className="flex">
       <div className="w-1/4 bg-gray-200 p-4 ">
-        <h2 className="text-xl font-bold mb-4">Panel</h2>
+        <h2 className="text-xl font-bold mb-4">{formattedDate}</h2>
         <ul className="">
           <li
             className={`cursor-pointer mb-2 ${
@@ -47,6 +60,14 @@ const DashboardPage = () => {
             onClick={() => setActiveTab("Notes")}
           >
             Notes
+          </li>
+          <li
+            className={`cursor-pointer mb-2 ${
+              activeTab === "Files" ? "font-bold" : ""
+            }`}
+            onClick={() => setActiveTab("Files")}
+          >
+            Files
           </li>
         </ul>
       </div>

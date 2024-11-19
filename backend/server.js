@@ -1,4 +1,5 @@
 import path from "path";
+import fs from "fs";
 import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
@@ -8,8 +9,15 @@ import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import userRoutes from "./routes/userRoutes.js";
 import todoRoutes from "./routes/todoRoutes.js";
 import noteRoutes from "./routes/noteRoutes.js";
+import fileRoutes from "./routes/fileRoutes.js";
 
 const port = process.env.PORT || 5000;
+
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(process.cwd(), "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
 
 connectDB();
 
@@ -23,6 +31,9 @@ app.use(cookieParser());
 app.use("/api/users", userRoutes);
 app.use("/api/todos", todoRoutes);
 app.use("/api/notes", noteRoutes);
+app.use("/api/files", fileRoutes);
+
+app.use("/uploads", express.static("uploads"));
 
 if (process.env.NODE_ENV === "production") {
   const __dirname = path.resolve();
