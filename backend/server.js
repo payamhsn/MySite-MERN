@@ -10,6 +10,7 @@ import userRoutes from "./routes/userRoutes.js";
 import todoRoutes from "./routes/todoRoutes.js";
 import noteRoutes from "./routes/noteRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
+import blogRoutes from "./routes/blogRoutes.js";
 
 const port = process.env.PORT || 5000;
 
@@ -32,6 +33,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/todos", todoRoutes);
 app.use("/api/notes", noteRoutes);
 app.use("/api/files", fileRoutes);
+app.use("/api/blogs", blogRoutes);
 
 app.use("/uploads", express.static("uploads"));
 

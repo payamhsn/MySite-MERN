@@ -3,6 +3,7 @@ import Todos from "../components/Todos";
 import NotesPage from "../components/NotesPage";
 import DashboardTab from "../components/DashboardTab";
 import FilesPage from "../components/FilesPage";
+import BlogsPage from "../components/BlogsPage";
 
 const DashboardPage = () => {
   const [activeTab, setActiveTab] = useState("Dashboard");
@@ -27,14 +28,16 @@ const DashboardPage = () => {
         return <NotesPage />;
       case "Files":
         return <FilesPage />;
+      case "Blogs":
+        return <BlogsPage />;
       default:
         return null;
     }
   };
 
   return (
-    <div className="flex">
-      <div className="w-1/4 bg-gray-200 p-4 ">
+    <div className="flex h-[calc(100vh-120px)]">
+      <div className="w-1/4 bg-gray-200 p-4 overflow-y-auto">
         <h2 className="text-xl font-bold mb-4">{formattedDate}</h2>
         <ul className="">
           <li
@@ -69,9 +72,17 @@ const DashboardPage = () => {
           >
             Files
           </li>
+          <li
+            className={`cursor-pointer mb-2 ${
+              activeTab === "Blogs" ? "font-bold" : ""
+            }`}
+            onClick={() => setActiveTab("Blogs")}
+          >
+            Blogs
+          </li>
         </ul>
       </div>
-      <div className="w-3/4 p-4">
+      <div className="w-3/4 p-4 overflow-y-auto">
         {/* <h1 className="text-3xl font-bold mb-5">Welcome to your Dashboard</h1> */}
         {renderContent()}
       </div>

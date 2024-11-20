@@ -7,6 +7,7 @@ import AboutPage from "./screens/AboutPage";
 import LoginPage from "./screens/LoginPage";
 import RegisterPage from "./screens/RegisterPage";
 import DashboardPage from "./screens/DashboardPage";
+import PublicBlogsPage from "./screens/PublicBlogsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Toast from "./components/Toast";
 import axios from "axios";
@@ -53,6 +54,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/blogs" element={<PublicBlogsPage />} />
           <Route
             path="/login"
             element={
