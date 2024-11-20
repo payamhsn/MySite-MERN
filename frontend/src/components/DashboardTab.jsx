@@ -11,10 +11,49 @@ const DashboardTab = () => {
     email: "",
     password: "",
   });
+  const [counts, setCounts] = useState({
+    notes: 0,
+    todos: { total: 0, completed: 0, uncompleted: 0 },
+    files: 0,
+    blogs: 0,
+  });
 
   useEffect(() => {
     fetchUserData();
+    fetchCounts();
   }, []);
+
+  const fetchCounts = async () => {
+    try {
+      setLoading(true);
+      const config = {
+        headers: {
+          Authorization: `Bearer ${
+            JSON.parse(localStorage.getItem("userInfo")).token
+          }`,
+        },
+      };
+
+      const [notesResponse, todosResponse, filesResponse, blogsResponse] =
+        await Promise.all([
+          axios.get("/api/notes/count", config),
+          axios.get("/api/todos/count", config),
+          axios.get("/api/files/count", config),
+          axios.get("/api/blogs/count", config),
+        ]);
+
+      setCounts({
+        notes: notesResponse.data.count,
+        todos: todosResponse.data,
+        files: filesResponse.data.count,
+        blogs: blogsResponse.data.count,
+      });
+    } catch (error) {
+      console.error("Error fetching counts:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchUserData = async () => {
     try {
@@ -78,6 +117,27 @@ const DashboardTab = () => {
       >
         Edit Profile
       </button>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        <div className="bg-white p-4 rounded shadow">
+          <h2 className="text-xl font-bold mb-2">Notes</h2>
+          <p>Total: {counts.notes}</p>
+        </div>
+        <div className="bg-white p-4 rounded shadow">
+          <h2 className="text-xl font-bold mb-2">Todos</h2>
+          <p>Total: {counts.todos.total}</p>
+          <p>Completed: {counts.todos.completed}</p>
+          <p>Uncompleted: {counts.todos.uncompleted}</p>
+        </div>
+        <div className="bg-white p-4 rounded shadow">
+          <h2 className="text-xl font-bold mb-2">Files</h2>
+          <p>Total: {counts.files}</p>
+        </div>
+        <div className="bg-white p-4 rounded shadow">
+          <h2 className="text-xl font-bold mb-2">Blogs</h2>
+          <p>Total: {counts.blogs}</p>
+        </div>
+      </div>
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center">

@@ -64,4 +64,17 @@ const deleteTodo = asyncHandler(async (req, res) => {
   }
 });
 
-export { getUserTodos, createTodo, updateTodo, deleteTodo };
+// @desc    Count todos
+// @route   GET /api/todos/count
+// @access  Private
+const countTodos = asyncHandler(async (req, res) => {
+  const total = await Todo.countDocuments({ user: req.user._id });
+  const completed = await Todo.countDocuments({
+    user: req.user._id,
+    completed: true,
+  });
+  const uncompleted = total - completed;
+  res.json({ total, completed, uncompleted });
+});
+
+export { getUserTodos, countTodos, createTodo, updateTodo, deleteTodo };

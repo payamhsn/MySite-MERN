@@ -5,6 +5,7 @@ import {
   uploadFile,
   getFiles,
   deleteFile,
+  countFiles,
   downloadFile,
 } from "../controllers/fileController.js";
 import { protect } from "../middleware/authMiddleware.js";
@@ -28,5 +29,6 @@ router
   .post(protect, upload.single("file"), uploadFile);
 router.route("/:id").delete(protect, deleteFile);
 router.route("/:id/download").get(protect, downloadFile);
+router.route("/count").get(protect, countFiles);
 
 export default router;

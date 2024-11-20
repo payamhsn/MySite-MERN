@@ -129,8 +129,17 @@ const getBlogById = asyncHandler(async (req, res) => {
   res.json(blog);
 });
 
+// @desc    count blogs
+// @route   GET /api/blogs/count
+// @access  private
+const countBlogs = asyncHandler(async (req, res) => {
+  const count = await Blog.countDocuments({ user: req.user._id });
+  res.json({ count });
+});
+
 export {
   getBlogs,
+  countBlogs,
   getUserBlogs,
   createBlog,
   updateBlog,

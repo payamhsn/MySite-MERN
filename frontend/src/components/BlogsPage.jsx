@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { FiEdit, FiTrash2, FiPaperclip } from "react-icons/fi";
+import Spinner from "./Spinner";
 
 const BlogsPage = () => {
   const [blogs, setBlogs] = useState([]);
@@ -11,6 +12,9 @@ const BlogsPage = () => {
     images: [],
   });
   const [editingBlog, setEditingBlog] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchBlogs();
@@ -18,6 +22,7 @@ const BlogsPage = () => {
 
   const fetchBlogs = async () => {
     try {
+      setLoading(true);
       const userInfo = JSON.parse(localStorage.getItem("userInfo"));
       const config = {
         headers: {
@@ -30,6 +35,8 @@ const BlogsPage = () => {
     } catch (error) {
       console.error("Error fetching blogs:", error);
       toast.error("Error fetching blogs");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -65,14 +72,25 @@ const BlogsPage = () => {
     }
 
     try {
+      setIsUploading(true);
+      setUploadProgress(0);
+
+      const config = {
+        headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: (progressEvent) => {
+          const progress = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          setUploadProgress(progress);
+        },
+      };
+
       if (editingBlog) {
         // Update existing blog
         const response = await axios.put(
           `/api/blogs/${editingBlog._id}`,
           formDataToSend,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          }
+          config
         );
         setBlogs(
           blogs.map((blog) =>
@@ -82,9 +100,7 @@ const BlogsPage = () => {
         toast.success("Blog updated successfully");
       } else {
         // Create new blog
-        const response = await axios.post("/api/blogs", formDataToSend, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        const response = await axios.post("/api/blogs", formDataToSend, config);
         setBlogs([response.data, ...blogs]);
         toast.success("Blog created successfully");
       }
@@ -94,6 +110,9 @@ const BlogsPage = () => {
       setEditingBlog(null);
     } catch (error) {
       toast.error("Error saving blog");
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -118,110 +137,132 @@ const BlogsPage = () => {
 
   return (
     <div className="p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="mb-6 bg-white p-6 rounded shadow"
-      >
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
-            Title
-          </label>
-          <input
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleInputChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            required
-          />
+      {loading ? (
+        <div className="h-[50vh] flex items-center justify-center">
+          <Spinner size="large" />
         </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
-            Content
-          </label>
-          <textarea
-            name="content"
-            value={formData.content}
-            onChange={handleInputChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            rows="4"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
-            Images (optional)
-          </label>
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={handleImageChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          />
-        </div>
-        <button
-          type="submit"
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-        >
-          {editingBlog ? "Update Blog" : "Create Blog"}
-        </button>
-        {editingBlog && (
-          <button
-            type="button"
-            onClick={() => {
-              setEditingBlog(null);
-              setFormData({ title: "", content: "", images: [] });
-            }}
-            className="ml-2 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-          >
-            Cancel
-          </button>
-        )}
-      </form>
-
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {blogs.map((blog) => (
-          <div
-            key={blog._id}
-            className="border rounded-lg p-4 shadow hover:shadow-md transition-shadow"
-          >
-            <h3 className="font-semibold text-lg mb-2">{blog.title}</h3>
-            <p className="text-gray-600 mb-2 truncate">{blog.content}</p>
-            {blog.images && blog.images.length > 0 && (
-              <div className="flex space-x-2 mb-2">
-                {blog.images.map((image, index) => (
-                  <img
-                    key={index}
-                    src={`/${image}`}
-                    alt={`Blog ${blog.title}`}
-                    className="h-16 w-16 object-cover rounded"
-                  />
-                ))}
+      ) : (
+        <>
+          {isUploading && (
+            <div className="mb-6">
+              <div className="w-full h-2 bg-gray-200 rounded">
+                <div
+                  className="h-2 bg-blue-600 rounded"
+                  style={{ width: `${uploadProgress}%` }}
+                ></div>
               </div>
-            )}
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-500">
-                {new Date(blog.createdAt).toLocaleDateString()}
-              </span>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => handleEdit(blog)}
-                  className="text-blue-500 hover:text-blue-700"
-                >
-                  <FiEdit />
-                </button>
-                <button
-                  onClick={() => handleDelete(blog._id)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <FiTrash2 />
-                </button>
-              </div>
+              <p className="text-sm text-gray-500 mt-1">
+                Uploading... {uploadProgress}%
+              </p>
             </div>
+          )}
+          <form
+            onSubmit={handleSubmit}
+            className="mb-6 bg-white p-6 rounded shadow"
+          >
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Title
+              </label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Content
+              </label>
+              <textarea
+                name="content"
+                value={formData.content}
+                onChange={handleInputChange}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                rows="4"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Images (optional)
+              </label>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageChange}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              />
+            </div>
+            <button
+              type="submit"
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
+              disabled={isUploading}
+            >
+              {editingBlog ? "Update" : "Create"} Blog
+            </button>
+            {editingBlog && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingBlog(null);
+                  setFormData({ title: "", content: "", images: [] });
+                }}
+                className="ml-2 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              >
+                Cancel
+              </button>
+            )}
+          </form>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {blogs.map((blog) => (
+              <div
+                key={blog._id}
+                className="border rounded-lg p-4 shadow hover:shadow-md transition-shadow"
+              >
+                <h3 className="font-semibold text-lg mb-2">{blog.title}</h3>
+                <p className="text-gray-600 mb-2 truncate">{blog.content}</p>
+                {blog.images && blog.images.length > 0 && (
+                  <div className="flex space-x-2 mb-2">
+                    {blog.images.map((image, index) => (
+                      <img
+                        key={index}
+                        src={`/${image}`}
+                        alt={`Blog ${blog.title}`}
+                        className="h-16 w-16 object-cover rounded"
+                      />
+                    ))}
+                  </div>
+                )}
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500">
+                    {new Date(blog.createdAt).toLocaleDateString()}
+                  </span>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleEdit(blog)}
+                      className="text-blue-500 hover:text-blue-700"
+                    >
+                      <FiEdit />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(blog._id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <FiTrash2 />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
     </div>
   );
 };

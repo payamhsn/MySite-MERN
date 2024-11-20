@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { FiUpload, FiDownload, FiTrash2 } from "react-icons/fi";
+import Spinner from "./Spinner";
 
 const FilesPage = () => {
   const [files, setFiles] = useState([]);

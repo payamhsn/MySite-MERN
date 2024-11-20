@@ -67,4 +67,13 @@ const deleteNote = asyncHandler(async (req, res) => {
   }
 });
 
-export { getNotes, createNote, updateNote, deleteNote };
+// @desc    Count notes
+// @route   GET /api/notes/count
+// @access  Private
+
+const countNotes = asyncHandler(async (req, res) => {
+  const count = await Note.countDocuments({ user: req.user._id });
+  res.json({ count });
+});
+
+export { getNotes, countNotes, createNote, updateNote, deleteNote };

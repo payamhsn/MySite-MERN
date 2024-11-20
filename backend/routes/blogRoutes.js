@@ -4,6 +4,7 @@ import path from "path";
 import {
   getBlogs,
   getUserBlogs,
+  countBlogs,
   createBlog,
   updateBlog,
   deleteBlog,
@@ -42,6 +43,8 @@ const upload = multer({
 // router.get("/:id", getBlogById);
 
 // Protected routes
+router.get("/count", protect, countBlogs);
+
 router
   .get("/my-blogs", protect, getUserBlogs)
   .get("/", getBlogs)

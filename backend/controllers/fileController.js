@@ -66,4 +66,13 @@ const downloadFile = asyncHandler(async (req, res) => {
   res.download(file.path, file.originalname);
 });
 
-export { getFiles, uploadFile, deleteFile, downloadFile };
+// Count files
+// GET /api/files/count
+// Private
+
+const countFiles = asyncHandler(async (req, res) => {
+  const count = await File.countDocuments({ user: req.user._id });
+  res.json({ count });
+});
+
+export { getFiles, countFiles, uploadFile, deleteFile, downloadFile };
