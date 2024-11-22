@@ -26,7 +26,7 @@ const getUserBlogs = asyncHandler(async (req, res) => {
 // @access  Private
 const createBlog = asyncHandler(async (req, res) => {
   const { title, content } = req.body;
-  console.log(req);
+  // console.log(req);
   // test e omadane file
   const user = await User.findById(req.user._id);
 

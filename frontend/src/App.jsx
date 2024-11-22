@@ -11,6 +11,7 @@ import PublicBlogsPage from "./screens/PublicBlogsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Toast from "./components/Toast";
 import axios from "axios";
+import BlogDetailPage from "./screens/BlogDetailPage";
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -55,6 +56,7 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/blogs" element={<PublicBlogsPage />} />
+          <Route path="/blogs/:id" element={<BlogDetailPage />} />
           <Route
             path="/login"
             element={

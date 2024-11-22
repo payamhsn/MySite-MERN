@@ -40,7 +40,7 @@ const BlogsPage = () => {
     }
   };
 
-  console.log(blogs.map((blog) => blog.images.map((image) => image)));
+  // console.log(blogs.map((blog) => blog.images.map((image) => image)));
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
