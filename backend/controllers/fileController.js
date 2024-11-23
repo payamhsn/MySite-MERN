@@ -11,7 +11,7 @@ const getFiles = asyncHandler(async (req, res) => {
 const uploadFile = asyncHandler(async (req, res) => {
   if (!req.file) {
     res.status(400);
-    throw new Error("No file uploaded");
+    throw new Error("No file uploaded or file size exceeds limit");
   }
 
   const file = await File.create({

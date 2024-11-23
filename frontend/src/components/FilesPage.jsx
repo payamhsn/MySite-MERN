@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
-import { FiUpload, FiDownload, FiTrash2 } from "react-icons/fi";
+import { FiUpload, FiDownload, FiTrash2, FiFile } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
 import Spinner from "./Spinner";
+import { toast } from "react-toastify";
 
 const FilesPage = () => {
   const [files, setFiles] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [dragOver, setDragOver] = useState(false);
 
   useEffect(() => {
     fetchFiles();
@@ -15,16 +18,24 @@ const FilesPage = () => {
 
   const fetchFiles = async () => {
     try {
+      setLoading(true);
       const response = await axios.get("/api/files");
       setFiles(response.data);
     } catch (error) {
       toast.error("Error fetching files");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleFileUpload = async (event) => {
-    const file = event.target.files[0];
+  const handleFileUpload = async (file) => {
     if (!file) return;
+
+    const maxSize = 100 * 1024 * 1024; // 100MB
+    if (file.size > maxSize) {
+      toast.error("File size exceeds 100MB limit");
+      return;
+    }
 
     const formData = new FormData();
     formData.append("file", file);
@@ -45,7 +56,12 @@ const FilesPage = () => {
         },
       });
 
-      setFiles([...files, response.data]);
+      const uploadedFile = {
+        ...response.data,
+        size: file.size,
+      };
+
+      setFiles([...files, uploadedFile]);
       toast.success("File uploaded successfully");
     } catch (error) {
       toast.error("Error uploading file");
@@ -82,19 +98,68 @@ const FilesPage = () => {
     }
   };
 
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    handleFileUpload(file);
+  };
+
+  const fileInputRef = React.useRef(null);
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
+
+  if (loading) {
+    return (
+      <div className="h-[50vh] flex items-center justify-center">
+        <Spinner size="large" />
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4">
-      <div className="mb-6">
-        <label className="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out cursor-pointer">
-          <input
-            type="file"
-            className="hidden"
-            onChange={handleFileUpload}
-            disabled={isUploading}
-          />
-          <FiUpload className="inline mr-2" />
-          Upload File
-        </label>
+    <div className="p-6 max-w-6xl mx-auto">
+      <h2 className="text-3xl font-bold mb-6 text-gray-800">My Files</h2>
+
+      <div
+        className={`mb-8 border-2 border-dashed rounded-lg p-8 text-center ${
+          dragOver ? "border-blue-500 bg-blue-50" : "border-gray-300"
+        }`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          onChange={(e) => handleFileUpload(e.target.files[0])}
+        />
+        <button
+          onClick={() => fileInputRef.current.click()}
+          className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out inline-flex items-center"
+          disabled={isUploading}
+        >
+          <FiUpload className="mr-2" />
+          {isUploading ? "Uploading..." : "Upload File"}
+        </button>
+        <p className="mt-2 text-gray-600">or drag and drop your file here</p>
       </div>
 
       {isUploading && (
@@ -111,40 +176,60 @@ const FilesPage = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <AnimatePresence>
         {files.map((file) => (
-          <div
+          <motion.div
             key={file._id}
-            className="border rounded-lg p-4 shadow hover:shadow-md transition-shadow"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white rounded-lg shadow-md p-6 mb-4 flex items-center justify-between hover:shadow-lg transition duration-300 ease-in-out"
           >
-            <h3 className="font-semibold text-lg mb-2">{file.originalname}</h3>
-            <p className="text-sm text-gray-500 mb-2">
-              Uploaded on{" "}
-              {new Date(file.createdAt).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </p>
-            <div className="flex justify-end space-x-2">
+            <div className="flex items-center">
+              <FiFile className="text-4xl text-blue-500 mr-4" />
+              <div>
+                <h3 className="font-semibold text-lg text-gray-800">
+                  {file.originalname}
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Uploaded on{" "}
+                  {new Date(file.createdAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Size: {formatFileSize(file.size)}
+                </p>
+              </div>
+            </div>
+            <div className="flex space-x-2">
               <button
                 onClick={() => handleDownload(file._id, file.originalname)}
-                className="p-2 text-blue-600 hover:text-blue-800"
+                className="p-2 text-blue-600 hover:text-blue-800 transition duration-300 ease-in-out"
                 title="Download"
               >
-                <FiDownload />
+                <FiDownload className="text-xl" />
               </button>
               <button
                 onClick={() => handleDelete(file._id)}
-                className="p-2 text-red-600 hover:text-red-800"
+                className="p-2 text-red-600 hover:text-red-800 transition duration-300 ease-in-out"
                 title="Delete"
               >
-                <FiTrash2 />
+                <FiTrash2 className="text-xl" />
               </button>
             </div>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </AnimatePresence>
+
+      {files.length === 0 && (
+        <p className="text-center text-gray-500 mt-8">
+          No files uploaded yet. Upload a file to get started!
+        </p>
+      )}
     </div>
   );
 };

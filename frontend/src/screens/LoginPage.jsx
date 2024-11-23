@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Toast from "../components/Toast";
 
@@ -12,6 +12,17 @@ const LoginPage = ({ isLoggedIn, setIsLoggedIn }) => {
     type: "success",
   });
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get the redirect path from location state, default to dashboard
+  const from = location.state?.from?.pathname || "/dashboard";
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate(from, { replace: true });
+    }
+  }, [isLoggedIn, navigate, from]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -23,13 +34,13 @@ const LoginPage = ({ isLoggedIn, setIsLoggedIn }) => {
 
       setToast({
         show: true,
-        message: "Successfully logged in! Redirecting to dashboard...",
+        message: `Successfully logged in! Redirecting...`,
         type: "success",
       });
 
       // Short delay before redirect to show the success message
       setTimeout(() => {
-        navigate("/dashboard");
+        navigate(from, { replace: true });
       }, 1500);
     } catch (error) {
       console.error(error);
@@ -43,10 +54,18 @@ const LoginPage = ({ isLoggedIn, setIsLoggedIn }) => {
     }
   };
 
+  const redirectMessage =
+    from !== "/dashboard" ? "Please log in to access this page." : "";
+
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-4rem)]">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md m-4">
         <h2 className="text-2xl font-bold mb-4">Login</h2>
+        {redirectMessage && (
+          <div className="mb-4 p-3 bg-blue-50 text-blue-700 rounded-md">
+            {redirectMessage}
+          </div>
+        )}
         <form onSubmit={handleLogin}>
           <div className="mb-4">
             <label htmlFor="email" className="block font-medium mb-2">

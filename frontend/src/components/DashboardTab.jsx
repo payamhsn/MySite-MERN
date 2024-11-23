@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import Spinner from "./Spinner";
+import axios from "axios";
+import {
+  BsFiles,
+  BsListCheck,
+  BsJournalText,
+  BsPencilSquare,
+} from "react-icons/bs";
 
 const DashboardTab = () => {
   const [user, setUser] = useState(null);
@@ -72,14 +78,6 @@ const DashboardTab = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="h-[50vh] flex items-center justify-center">
-        <Spinner size="large" />
-      </div>
-    );
-  }
-
   const handleEditClick = () => {
     setIsModalOpen(true);
   };
@@ -104,38 +102,62 @@ const DashboardTab = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="h-[50vh] flex items-center justify-center">
+        <Spinner size="large" />
+      </div>
+    );
+  }
+
   if (!user) {
     return <div>Loading...</div>;
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-3xl font-bold mb-4">Welcome, {user.name}!</h1>
-      <button
-        onClick={handleEditClick}
-        className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-      >
-        Edit Profile
-      </button>
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8 flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-gray-800">
+            Welcome, {user.name}!
+          </h1>
+          <button
+            onClick={handleEditClick}
+            className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out transform hover:scale-105"
+          >
+            Edit Profile
+          </button>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-        <div className="bg-white p-4 rounded shadow">
-          <h2 className="text-xl font-bold mb-2">Notes</h2>
-          <p>Total: {counts.notes}</p>
-        </div>
-        <div className="bg-white p-4 rounded shadow">
-          <h2 className="text-xl font-bold mb-2">Todos</h2>
-          <p>Total: {counts.todos.total}</p>
-          <p>Completed: {counts.todos.completed}</p>
-          <p>Uncompleted: {counts.todos.uncompleted}</p>
-        </div>
-        <div className="bg-white p-4 rounded shadow">
-          <h2 className="text-xl font-bold mb-2">Files</h2>
-          <p>Total: {counts.files}</p>
-        </div>
-        <div className="bg-white p-4 rounded shadow">
-          <h2 className="text-xl font-bold mb-2">Blogs</h2>
-          <p>Total: {counts.blogs}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <DashboardCard
+            title="Notes"
+            count={counts.notes}
+            icon={<BsJournalText className="text-yellow-500" size={24} />}
+            color="bg-yellow-100"
+          />
+          <DashboardCard
+            title="Todos"
+            count={counts.todos.total}
+            icon={<BsListCheck className="text-green-500" size={24} />}
+            color="bg-green-100"
+            subItems={[
+              { label: "Completed", value: counts.todos.completed },
+              { label: "Uncompleted", value: counts.todos.uncompleted },
+            ]}
+          />
+          <DashboardCard
+            title="Files"
+            count={counts.files}
+            icon={<BsFiles className="text-blue-500" size={24} />}
+            color="bg-blue-100"
+          />
+          <DashboardCard
+            title="Blogs"
+            count={counts.blogs}
+            icon={<BsPencilSquare className="text-purple-500" size={24} />}
+            color="bg-purple-100"
+          />
         </div>
       </div>
 
@@ -215,5 +237,30 @@ const DashboardTab = () => {
     </div>
   );
 };
+
+const DashboardCard = ({ title, count, icon, color, subItems }) => (
+  <div
+    className={`${color} p-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105`}
+  >
+    <div className="flex items-center justify-between mb-4">
+      <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
+      {icon}
+    </div>
+    <p className="text-3xl font-bold text-gray-900">{count}</p>
+    {subItems && (
+      <div className="mt-4">
+        {subItems.map((item, index) => (
+          <div
+            key={index}
+            className="flex justify-between text-sm text-gray-600"
+          >
+            <span>{item.label}:</span>
+            <span>{item.value}</span>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+);
 
 export default DashboardTab;

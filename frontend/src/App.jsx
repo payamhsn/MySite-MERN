@@ -15,6 +15,7 @@ import BlogDetailPage from "./screens/BlogDetailPage";
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [toast, setToast] = useState({
     show: false,
     message: "",
@@ -23,8 +24,12 @@ export default function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const userInfo = localStorage.getItem("userInfo");
-    setIsLoggedIn(!!userInfo);
+    const checkAuth = () => {
+      const userInfo = localStorage.getItem("userInfo");
+      setIsLoggedIn(!!userInfo);
+      setIsAuthChecked(true);
+    };
+    checkAuth();
   }, []);
 
   const handleLogout = async () => {
@@ -47,6 +52,15 @@ export default function App() {
       });
     }
   };
+
+  // Show loading state or spinner while checking authentication
+  if (!isAuthChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

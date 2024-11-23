@@ -1,11 +1,14 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 
 const ProtectedRoute = ({ isLoggedIn, children }) => {
-  if (!isLoggedIn) {
-    return <Navigate to="/login" replace />;
-  }
-  return children;
+  const location = useLocation();
+
+  return isLoggedIn ? (
+    children
+  ) : (
+    <Navigate to="/login" state={{ from: location }} replace />
+  );
 };
 
 export default ProtectedRoute;

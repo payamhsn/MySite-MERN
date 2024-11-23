@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Spinner from "./Spinner";
+import { FiPlus, FiTrash2, FiCheck } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Todos = () => {
   const [todos, setTodos] = useState([]);
@@ -33,6 +35,7 @@ const Todos = () => {
 
   const addTodo = async (e) => {
     e.preventDefault();
+    if (!newTodo.trim()) return;
     try {
       setSaving(true);
       const config = {
@@ -99,46 +102,71 @@ const Todos = () => {
   }
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Todos</h2>
-      <form onSubmit={addTodo} className="mb-4 flex items-center gap-2">
-        <input
-          type="text"
-          value={newTodo}
-          onChange={(e) => setNewTodo(e.target.value)}
-          placeholder="Add a new todo"
-          className="border p-2"
-        />
-        <button
-          type="submit"
-          className="bg-blue-500 text-white p-2 rounded flex items-center gap-2"
-          disabled={saving}
-        >
-          {saving && <Spinner size="small" className="text-white" />}
-          Add Todo
-        </button>
+    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+      <h2 className="text-3xl font-bold mb-6 text-gray-800">My Todos</h2>
+      <form onSubmit={addTodo} className="mb-8">
+        <div className="flex items-center">
+          <input
+            type="text"
+            value={newTodo}
+            onChange={(e) => setNewTodo(e.target.value)}
+            placeholder="Add a new todo"
+            className="flex-grow p-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+          <button
+            type="submit"
+            className="bg-blue-500 text-white p-3 rounded-r-lg hover:bg-blue-600 transition duration-300 ease-in-out flex items-center justify-center"
+            disabled={saving}
+          >
+            {saving ? (
+              <Spinner size="small" className="text-white" />
+            ) : (
+              <FiPlus className="text-xl" />
+            )}
+          </button>
+        </div>
       </form>
-      <ul>
+      <AnimatePresence>
         {todos.map((todo) => (
-          <li key={todo._id} className="flex items-center mb-2">
-            <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() => updateTodo(todo._id, !todo.completed)}
-              className="mr-2"
-            />
-            <span className={todo.completed ? "line-through" : ""}>
-              {todo.text}
-            </span>
+          <motion.div
+            key={todo._id}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="flex items-center justify-between p-4 mb-4 bg-gray-100 rounded-lg hover:shadow-md transition duration-300 ease-in-out"
+          >
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                checked={todo.completed}
+                onChange={() => updateTodo(todo._id, !todo.completed)}
+                className="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-400"
+              />
+              <span
+                className={`ml-3 text-lg ${
+                  todo.completed
+                    ? "line-through text-gray-500"
+                    : "text-gray-800"
+                }`}
+              >
+                {todo.text}
+              </span>
+            </div>
             <button
               onClick={() => deleteTodo(todo._id)}
-              className="ml-auto bg-red-500 text-white p-1 rounded"
+              className="text-red-500 hover:text-red-700 transition duration-300 ease-in-out"
             >
-              Delete
+              <FiTrash2 className="text-xl" />
             </button>
-          </li>
+          </motion.div>
         ))}
-      </ul>
+      </AnimatePresence>
+      {todos.length === 0 && (
+        <p className="text-center text-gray-500 mt-8">
+          No todos yet. Add one to get started!
+        </p>
+      )}
     </div>
   );
 };
